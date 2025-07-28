@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import Intro from "../components/Intro.jsx";
 import MessageComponent from "../components/MessageComponent.jsx";
+import Profile from "../components/Profile.jsx";
 
 function Chat() {
   const [messages, setMessages] = useState([]);
@@ -89,6 +90,7 @@ function Chat() {
           </button>
         )}
       </div>
+      <Profile />
     </div>
   );
 }
