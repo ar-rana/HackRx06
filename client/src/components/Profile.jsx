@@ -7,7 +7,7 @@ const Profile = () => {
   const [name, setName] = useState("Hello");
   return (
     <div
-      className={`h-full w-[35%] bg-gray-600 border-r-4 border-white absolute left-0 flex flex-col z-10 duration-400 ease-in-out 
+      className={`h-full w-[35%] bg-gray-600 border-r-3 border-white absolute left-0 flex flex-col z-10 duration-400 ease-in-out 
     ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
       <div className="relative h-3 w-3 text-2xl left-[107%] top-7 flex justify-center items-center">
@@ -31,10 +31,10 @@ const Profile = () => {
         </div>
         <div className="flex flex-col gap-2">
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
-            Name: {name}
+            UserName: {name}
           </span>
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
-            UserName: {name}
+            Phone: {"0000 1111 22"}
           </span>
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
             Aadhar: {"XXXX XXXX XXXX 2406"}
