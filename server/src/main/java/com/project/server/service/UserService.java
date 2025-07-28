@@ -5,6 +5,9 @@ import java.util.Optional;
 import com.project.server.model.User;
 import com.project.server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +16,12 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtService jwtService;
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
@@ -31,15 +40,16 @@ public class UserService {
         return existingUser.isPresent();
     }
 
-    public void updateUser() {
-
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 
-    public void logOut() {
+    public String logIn(User user) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
-    }
-
-    public void logIn() {
-
+        if(authentication.isAuthenticated())
+            return jwtService.generateToken(user.getUsername());
+        else
+            return "";
     }
 }

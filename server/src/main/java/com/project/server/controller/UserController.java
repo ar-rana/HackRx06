@@ -2,6 +2,7 @@ package com.project.server.controller;
 
 import java.util.Map;
 
+import com.project.server.model.User;
 import com.project.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,21 +22,23 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> item) {
-        String user = item.get("username");
+        String username = item.get("username");
         String password = item.get("username");
 
-        if (userService.saveUser(user, password)) {
-            return ResponseEntity.status(HttpStatus.OK).body("user " + user + " created successfully");
+        if (userService.saveUser(username, password)) {
+            return ResponseEntity.status(HttpStatus.OK).body("user " + username + " created successfully");
         };
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> item) {
-        String user = item.get("username");
+        String username = item.get("username");
         String password = item.get("username");
+        User user = new User(username, password);
 
-        return ResponseEntity.ok().build();
+        String res = userService.logIn(user);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @GetMapping("/logout")
