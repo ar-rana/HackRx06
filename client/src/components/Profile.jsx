@@ -4,7 +4,7 @@ const Profile = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [verified, setVerfied] = useState(false);
 
-  const [name, setName] = useState("Hello");
+  const [username, setUsername] = useState("Hello");
   return (
     <div
       className={`h-full w-[35%] bg-gray-600 border-r-3 border-white absolute left-0 flex flex-col z-10 duration-400 ease-in-out 
@@ -31,7 +31,7 @@ const Profile = () => {
         </div>
         <div className="flex flex-col gap-2">
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
-            UserName: {name}
+            UserName: {username}
           </span>
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
             Phone: {"0000 1111 22"}

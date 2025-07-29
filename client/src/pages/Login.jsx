@@ -1,15 +1,111 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [signUp, useSignUp] = useState(false);
+  const navigate = useNavigate();
+
+  const [signUp, setSignUp] = useState(false);
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [warning, setWarning] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+
+  const login = async (e) => {
+    e.preventDefault();
+    if (!user || !pass) {
+      setWarning("please fill all fields");
+      return;
+    }
+    setWarning("");
+    try {
+      const res = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: user,
+          password: pass,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("token", data);
+        navigate("/chat");
+      }
+    } catch (e) {
+      console.log("some error occured: ", e.message);
+    }
+  };
+
+  const register = async (e) => {
+    e.preventDefault();
+    if (!user || !pass || !confirmPass) {
+      setWarning("please fill all fields");
+      return;
+    }
+    if (pass != confirmPass) {
+      setWarning("password does not match");
+      return;
+    }
+    setWarning("");
+    try {
+      const res = await fetch("http://localhost:8080/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: user,
+          password: pass,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert(data);
+        setSignUp(false);
+      } else {
+        setWarning(data);
+      }
+    } catch (e) {
+      console.log("some error occured: ", e.message);
+    }
+  };
+
+  const verify = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/auth/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: user,
+          password: pass,
+        }),
+      });
+
+      if (res.ok) {
+        navigate("/chat");
+      }
+    } catch (e) {
+      console.log("some error occured: ", e.message);
+    }
+  }
 
   const changeFormState = (e) => {
     e.preventDefault();
-    useSignUp((prev) => !prev);
+    setSignUp((prev) => !prev);
   };
 
+  useEffect(() => {
+    verify();
+  }, []);
+
   return (
-    <div className="bg-gray-50 dark:bg-gray-900">
+    <div className="bg-slate-700 h-full w-full">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <a
           href="#"
@@ -39,9 +135,10 @@ const Login = () => {
                   type="email"
                   name="email"
                   id="email"
+                  onChange={(e) => setUser(e.target.value)}
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="youemail@provider.com"
-                  required=""
+                  required
                 />
               </div>
               <div>
@@ -55,9 +152,10 @@ const Login = () => {
                   type="password"
                   name="password"
                   id="password"
+                  onChange={(e) => setPass(e.target.value)}
                   placeholder="••••••••"
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  required=""
+                  required
                 />
               </div>
               {signUp ? (
@@ -73,23 +171,48 @@ const Login = () => {
                       type="password"
                       name="password"
                       id="password"
+                      onChange={(e) => setConfirmPass(e.target.value)}
                       placeholder="••••••••"
                       className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      required=""
+                      required
                     />
                   </div>
                 </>
               ) : (
                 ""
               )}
-              <button
-                type="submit"
-                className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-              >
-                {signUp ? "Register" : "Sign In"}
-              </button>
+              {signUp ? (
+                <>
+                  <button
+                    type="submit"
+                    onClick={(e) => register(e)}
+                    className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                  >
+                    Register
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={(e) => login(e)}
+                    type="submit"
+                    className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                  >
+                    Sign In
+                  </button>
+                </>
+              )}
+              {warning ? (
+                <>
+                  <p className="text-sm font-normal text-red-600 p-0 m-0">
+                    {warning}
+                  </p>
+                </>
+              ) : (
+                ""
+              )}
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                Don’t have an account yet?{" "}
+                {signUp ? "Have an account. " : "Don’t have an account yet? "}
                 <button
                   onClick={(e) => changeFormState(e)}
                   className="font-medium text-blue-600 hover:underline dark:text-primary-500"
