@@ -3,8 +3,10 @@ import { useState } from "react";
 import Intro from "../components/Intro.jsx";
 import MessageComponent from "../components/MessageComponent.jsx";
 import Profile from "../components/Profile.jsx";
+import { useAuthContext } from "../hooks/TokenContext.jsx";
 
 function Chat() {
+  const { token } = useAuthContext();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
@@ -19,12 +21,13 @@ function Chat() {
     setLoading(true);
     setMessages(prev => [...prev, {user: true, text: input}]);
     try {
-      const res = await fetch(`http://localhost:8000/query/answer?input=${input}`, {
-        method: "GET",
+      const res = await fetch(`http://localhost:8080/chat/conversation`, {
+        method: "POST",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },  
-        // body: JSON.stringify(input)
+        body: JSON.stringify(input)
       })
 
       // const resBody = res.body.getReader();

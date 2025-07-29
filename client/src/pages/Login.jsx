@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../hooks/TokenContext.jsx";
 
 const Login = () => {
+  const { token, setToken } = useAuthContext();
   const navigate = useNavigate();
 
   const [signUp, setSignUp] = useState(false);
@@ -32,7 +34,8 @@ const Login = () => {
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem("token", data);
-        navigate("/chat");
+        setToken(data);
+        // navigate("/chat");
       }
     } catch (e) {
       console.log("some error occured: ", e.message);
@@ -79,6 +82,7 @@ const Login = () => {
       const res = await fetch("http://localhost:8080/auth/verify", {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -102,7 +106,7 @@ const Login = () => {
 
   useEffect(() => {
     verify();
-  }, []);
+  }, [token]);
 
   return (
     <div className="bg-slate-700 h-full w-full">
