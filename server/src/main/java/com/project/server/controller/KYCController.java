@@ -1,5 +1,6 @@
 package com.project.server.controller;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ import com.project.server.model.KYCData;
 import com.project.server.model.User;
 import com.project.server.service.KYCService;
 import com.project.server.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -34,6 +36,9 @@ public class KYCController {
 
     @Value("${digilocker.product.instance}")
     private String inst;
+
+    @Value("${digilocker.redirect.url}")
+    private String redirectUrl;
 
     @Autowired
     private KYCService kycService;
@@ -79,16 +84,19 @@ public class KYCController {
     }
 
     @GetMapping("/kyc/callback")
-    public ResponseEntity<KYCData> callback() {
+    public void callback(HttpServletResponse response) throws IOException {
         KYCData data = kycService.verifyKYC(clientId, secret, inst);
-        if (data == null || data.getValidUntil().before(new Date())) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (data == null || data.getValidUntil().before(new Date())) {
+            response.sendRedirect(redirectUrl + "/error");
+            return;
+        }
         data.setRequestId(null);
 
         User user = userService.getUser();
         user.setVerified(true);
         userService.updateUser(user);
 
-        return ResponseEntity.status(HttpStatus.OK).body(data);
+        response.sendRedirect(redirectUrl);
     }
 
     @GetMapping("/kyc")
