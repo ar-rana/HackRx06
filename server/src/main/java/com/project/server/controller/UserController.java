@@ -28,7 +28,7 @@ public class UserController {
         if (userService.saveUser(username, password)) {
             return ResponseEntity.status(HttpStatus.OK).body("user " + username + " created successfully");
         };
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("user already exists");
     }
 
     @PostMapping("/login")

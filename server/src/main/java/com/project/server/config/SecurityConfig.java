@@ -30,7 +30,7 @@ public class SecurityConfig {
 
         http.csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("auth/register", "auth/login").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login").permitAll() // "verification/start/kyc"
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

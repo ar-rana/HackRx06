@@ -16,7 +16,7 @@ public class ChatController {
     @PostMapping("/conversation")
     public ResponseEntity<?> reply(@RequestBody Map<String, String> item) {
         String query = item.get("query");
-        String res = "answer to " + query + " will be something";
+        String res = "answer to " + query + " will be something...someday...maybe";
 
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
