@@ -5,6 +5,27 @@ const Profile = () => {
   const [verified, setVerfied] = useState(false);
 
   const [username, setUsername] = useState("Hello");
+
+  const startkyc = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/verification/start/kyc", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        setVerfied(true);
+      } else {
+        console.log("some error occured at KYC verification");
+      }
+    } catch (e) {
+      console.log("some error occured: ", e.message);
+    }
+  };
+
   return (
     <div
       className={`h-full w-[35%] bg-gray-600 border-r-3 border-white absolute left-0 flex flex-col z-10 duration-400 ease-in-out 
@@ -40,17 +61,23 @@ const Profile = () => {
             Aadhar: {"XXXX XXXX XXXX 2406"}
           </span>
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
-            Address: {"xyz building, abd place, kyp city, dgf district, wmn state - XXYYZZ"}
+            Address:{" "}
+            {
+              "xyz building, abd place, kyp city, dgf district, wmn state - XXYYZZ"
+            }
           </span>
           <div>
-          {verified ? (
-            ""
-          ) : (
-            <button className="w-full text-white bg-blue-600 font-semibold rounded-lg relative bottom-0 p-2 focus:ring-2 focus:outline-none focus:ring-primary-300">
-              Verify Aadhar
-            </button>
-          )}
-        </div>
+            {verified ? (
+              ""
+            ) : (
+              <button
+                className="w-full text-white bg-blue-600 font-semibold rounded-lg relative bottom-0 p-2 focus:ring-2 focus:outline-none focus:ring-primary-300"
+                onClick={startkyc}
+              >
+                Verify Aadhar
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

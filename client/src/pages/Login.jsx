@@ -80,15 +80,11 @@ const Login = () => {
   const verify = async () => {
     try {
       const res = await fetch("http://localhost:8080/auth/verify", {
-        method: "POST",
+        method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: user,
-          password: pass,
-        }),
+        }
       });
 
       if (res.ok) {

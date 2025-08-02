@@ -4,17 +4,15 @@ import Intro from "../components/Intro.jsx";
 import MessageComponent from "../components/MessageComponent.jsx";
 import Profile from "../components/Profile.jsx";
 import { useAuthContext } from "../hooks/TokenContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 function Chat() {
   const { token } = useAuthContext();
+
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
   const displayRef = useRef(null);
-
-  useEffect(() => {
-    displayRef.current.scrollIntoView();
-  }, [messages])
 
   const askChatbot = async () => {
     if (!input.trim()) return;
@@ -61,6 +59,10 @@ function Chat() {
       setLoading(false);
     }
   }
+  
+  useEffect(() => {
+    displayRef.current.scrollIntoView();
+  }, [messages]);
 
   return (
     <div className="relative h-screen flex bg-slate-800 justify-center">

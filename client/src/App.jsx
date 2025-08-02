@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import {BrowserRouter, Routes, Route} from "react-router-dom";
-import Chat from './pages/Chat';
-import Login from './pages/Login';
+import Chat from './pages/Chat.jsx';
+import Login from './pages/Login.jsx';
+import ChatWrapper from './pages/ChatWrapper.jsx';
 
 function App() {
 
@@ -9,7 +9,7 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path='/chat' element={<Chat />} />
+          <Route path='/chat' element={<ChatWrapper />} />
           <Route path='/' element={<Login />} />
         </Routes>
       </BrowserRouter>
