@@ -17,6 +17,9 @@ const Profile = () => {
       });
 
       if (res.ok) {
+        console.log(res.text());
+        console.log(res.json());
+        // window.open(res.text(), "_blank");
         setVerfied(true);
       } else {
         console.log("some error occured at KYC verification");
