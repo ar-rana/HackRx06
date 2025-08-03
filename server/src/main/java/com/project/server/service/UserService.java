@@ -28,7 +28,7 @@ public class UserService {
 
     public boolean saveUser(String username, String password) {
         User user = new User(username, password);
-//        user.setPassword((encoder.encode(user.getPassword())));
+        user.setPassword((encoder.encode(user.getPassword())));
         if (existingUser(user)) {
             return false;
         }
@@ -56,6 +56,6 @@ public class UserService {
         if(authentication.isAuthenticated())
             return jwtService.generateToken(user.getUsername());
         else
-            return "";
+            return null;
     }
 }

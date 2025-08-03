@@ -21,7 +21,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private String contactNumber;
     private boolean verified;
 
     public User(String username, String password) {

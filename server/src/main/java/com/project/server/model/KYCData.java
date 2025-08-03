@@ -5,6 +5,7 @@ import java.util.Date;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.Getter;
@@ -26,7 +27,9 @@ public class KYCData {
     private String requestId;
 
     private Date validUntil;
-    private Date dob;
+    private String dob;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String photo;
     private String name;
     private String maskedNumber;
@@ -35,6 +38,8 @@ public class KYCData {
     private String phone;
     private String postOffice;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String pdf;
 
     public KYCData(Date expirationDate, String requestId, String username) {

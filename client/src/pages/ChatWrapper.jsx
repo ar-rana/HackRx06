@@ -35,7 +35,7 @@ const ChatWrapper = () => {
   };
 
   useEffect(() => {
-    // verify();
+    verify();
   }, [token, verified]);
 
   if (verified) {

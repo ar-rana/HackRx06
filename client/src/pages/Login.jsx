@@ -30,15 +30,20 @@ const Login = () => {
           password: pass,
         }),
       });
+      console.log("login: ", res);
 
       if (res.ok) {
-        const data = await res.json();
+        const data = await res.text();
+        console.log("login: ", data);
         localStorage.setItem("token", data);
         setToken(data);
         // navigate("/chat");
+      } else {
+        setWarning("Invalid credentials");
       }
     } catch (e) {
       console.log("some error occured: ", e.message);
+      console.log(e);
     }
   };
 
@@ -65,7 +70,7 @@ const Login = () => {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.text();
       if (res.ok) {
         alert(data);
         setSignUp(false);
@@ -88,7 +93,8 @@ const Login = () => {
       });
 
       if (res.ok) {
-        navigate("/chat");
+        const user = await res.text()
+        navigate("/chat", {state: {msg: user}});
       }
     } catch (e) {
       console.log("some error occured: ", e.message);

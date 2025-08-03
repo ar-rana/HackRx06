@@ -1,10 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import defimg from "../assets/default_profile.png"
+import { useAuthContext } from "../hooks/TokenContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Profile = () => {
+  const { token } = useAuthContext();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [isOpen, setIsOpen] = useState(false);
   const [verified, setVerfied] = useState(false);
 
-  const [username, setUsername] = useState("Hello");
+  const [photo, setPhoto] = useState(defimg);
+  const [name, setName] = useState("verification required");
+  const [gender, setGender] = useState("verification required");
+  const [username, setUsername] = useState(location?.state?.msg);
+  const [phone, setPhone] = useState("verification required");
+  const [aadhaar, setAadhaar] = useState("verification required");
+  const [address, setAddress] = useState("verification required");
+  const [kycData, setKycdata ] = useState("verification required");
 
   const startkyc = async () => {
     try {
@@ -16,18 +30,54 @@ const Profile = () => {
         },
       });
 
-      if (res.ok) {
-        console.log(res.text());
-        console.log(res.json());
-        // window.open(res.text(), "_blank");
-        setVerfied(true);
-      } else {
-        console.log("some error occured at KYC verification");
+      console.log("kyc verify res: ", res);
+      if (res.status == 403) {
+        navigate("/", {state: {msg: "session timed out"}});
+      } else if (res) {
+        const data = await res.text();
+        console.log("kyc verify: ", data);
+
+        window.open(data, "_blank");
       }
     } catch (e) {
-      console.log("some error occured: ", e.message);
+      console.log("some error occured at KYC verification: ", e.message);
     }
   };
+
+  const getKycData = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/verification/kyc", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("kyc: ", res);
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("kyc: ", data);
+
+        setAadhaar(data.maskedNumber);
+        setAddress(data.address);
+        setGender(data.gender);
+        setKycdata(data.pdf);
+        setPhone(data.phone);
+        setName(data.name);
+        const img = "data:image/png;base64," + data.photo;
+        setPhoto(img);
+        setVerfied(true);
+      }
+    } catch (e) {
+      console.log("some error occured at KYC verification: ", e.message);
+    }
+  };
+
+  useEffect(() => {
+    getKycData();
+  }, []);
 
   return (
     <div
@@ -42,11 +92,11 @@ const Profile = () => {
           <b>H</b>
         </button>
       </div>
-      <div className="mx-4 mb-3 bg-gray-400 p-2 h-full">
+      <div className="mx-4 mb-3 bg-gray-400 p-2 h-full overflow-y-scroll">
         <div className="flex flex-col">
           <img
-            className="mr-auto ml-auto rounded-md"
-            src="https://picsum.photos/200"
+            className="mr-auto ml-auto rounded-md max-h-60"
+            src={photo}
             alt="Image"
           />
           <span className="text-gray-700 text-sm mr-auto ml-auto">
@@ -58,20 +108,28 @@ const Profile = () => {
             UserName: {username}
           </span>
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
-            Phone: {"0000 1111 22"}
+            Name: {name}
           </span>
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
-            Aadhar: {"XXXX XXXX XXXX 2406"}
+            Gender: {gender}
           </span>
           <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
-            Address:{" "}
-            {
-              "xyz building, abd place, kyp city, dgf district, wmn state - XXYYZZ"
-            }
+            Phone: {phone}
+          </span>
+          <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
+            Aadhar: {aadhaar}
+          </span>
+          <span className="bg-gray-200 text-gray-600 font-semibold rounded-lg block w-full p-2 py-1.5">
+            Address:{address}
           </span>
           <div>
             {verified ? (
-              ""
+              <button
+                className="w-full text-white bg-blue-600 font-semibold rounded-lg relative bottom-0 p-2 focus:ring-2 focus:outline-none focus:ring-primary-300"
+                onClick={() => window.open(kycData, "_blank")}
+              >
+                Download Your Data
+              </button>
             ) : (
               <button
                 className="w-full text-white bg-blue-600 font-semibold rounded-lg relative bottom-0 p-2 focus:ring-2 focus:outline-none focus:ring-primary-300"

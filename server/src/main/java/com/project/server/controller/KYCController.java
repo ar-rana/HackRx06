@@ -11,6 +11,7 @@ import com.project.server.model.User;
 import com.project.server.service.KYCService;
 import com.project.server.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -21,11 +22,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("verification")
+@Slf4j
 public class KYCController {
 
     @Value("${digilocker.client.id}")
@@ -70,31 +73,33 @@ public class KYCController {
                     DigilockerReq.class
             );
             if (res.getStatusCode().is2xxSuccessful() && res.getBody() != null) {
-                DigilockerReq responseBody = (DigilockerReq) res.getBody();
+                DigilockerReq responseBody = ((DigilockerReq) res.getBody());
+                log.info("Response for KYC: {}", responseBody.toString());
                 kycService.saveVerification(responseBody.getId(), responseBody.getValidUpto());
-
                 System.out.println("Response: " + res.getBody());
                 return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT).body(responseBody.getUrl());
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         } catch (Exception ex) {
+            log.info("Error occurred of: {}, while starting KYC: {}", ex.getClass(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
     }
 
     @GetMapping("/kyc/callback")
-    public void callback(HttpServletResponse response) throws IOException {
-        KYCData data = kycService.verifyKYC(clientId, secret, inst);
-        if (data == null || data.getValidUntil().before(new Date())) {
-            response.sendRedirect(redirectUrl + "/error");
+    public void callback(@RequestParam(required = true) Boolean success,
+                         @RequestParam(required = true) String id, HttpServletResponse response) throws IOException {
+        log.info("KYC status: {} for id: {}", success, id);
+        if (!success) {
+            response.sendRedirect(redirectUrl + "error");
             return;
         }
-        data.setRequestId(null);
-
-        User user = userService.getUser();
-        user.setVerified(true);
-        userService.updateUser(user);
+        KYCData data = kycService.verifyKYC(clientId, secret, inst, id);
+        if (data == null || data.getValidUntil().before(new Date())) {
+            response.sendRedirect(redirectUrl + "error");
+            return;
+        }
 
         response.sendRedirect(redirectUrl);
     }
@@ -103,7 +108,14 @@ public class KYCController {
     public ResponseEntity<KYCData> getKYCData() {
         KYCData data = kycService.getKYCData();
         if (data == null || data.getValidUntil().before(new Date())) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        User user = userService.getUser();
+        if (!user.isVerified()) {
+            user.setVerified(true);
+            userService.updateUser(user);
+        }
         data.setRequestId(null);
+        data.setExpirationDate(null);
+
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 }

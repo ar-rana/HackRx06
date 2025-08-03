@@ -7,6 +7,7 @@ import com.project.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +24,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> item) {
         String username = item.get("username");
-        String password = item.get("username");
+        String password = item.get("password");
 
         if (userService.saveUser(username, password)) {
             return ResponseEntity.status(HttpStatus.OK).body("user " + username + " created successfully");
@@ -33,11 +34,13 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> item) {
+        System.out.println("Login endpoint hit!");
         String username = item.get("username");
-        String password = item.get("username");
+        String password = item.get("password");
         User user = new User(username, password);
 
         String res = userService.logIn(user);
+        if (res == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
@@ -47,7 +50,8 @@ public class UserController {
     }
 
     @GetMapping("/verify")
-    public boolean verify(@RequestBody Map<String, String> item) {
-        return true;
+    public ResponseEntity<String> verify() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.status(HttpStatus.OK).body(username);
     }
 }

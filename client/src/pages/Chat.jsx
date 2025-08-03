@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 function Chat() {
   const { token } = useAuthContext();
+  const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,9 @@ function Chat() {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
         },  
-        body: JSON.stringify(input)
+        body: JSON.stringify({
+          query: input
+        })
       })
 
       // const resBody = res.body.getReader();
@@ -48,6 +51,9 @@ function Chat() {
       if (res.ok) {
         const response = await res.text();
         setMessages(prev => [...prev, {user: false, text: response}]);
+        setInput("");
+      } else if (res.status === 403) {
+        navigate("/", {state: {msg: "session timed out"}});
       } else {
         console.log(res);
         setMessages(prev => [...prev, {user: false, text: "Some error occured."}]);
@@ -86,7 +92,7 @@ function Chat() {
         />
         {loading ? (
           <button type="button" className="h-full bg-gray-400 flex rounded-3xl px-6 font-bold focus:outline-2 items-center gap-2">
-            <svg class="bg-white rounded-bl-2xl rounded-tr-2xl size-5 animate-spin" viewBox="0 0 20 20"></svg>
+            <svg className="bg-white rounded-bl-2xl rounded-tr-2xl size-5 animate-spin" viewBox="0 0 20 20"></svg>
             Loading....
           </button>
         ) : (

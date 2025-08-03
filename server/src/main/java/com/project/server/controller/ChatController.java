@@ -15,6 +15,7 @@ public class ChatController {
 
     @PostMapping("/conversation")
     public ResponseEntity<?> reply(@RequestBody Map<String, String> item) {
+        System.out.println("reached convo...");
         String query = item.get("query");
         String res = "answer to " + query + " will be something...someday...maybe";
 

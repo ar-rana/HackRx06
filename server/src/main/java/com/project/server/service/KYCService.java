@@ -48,8 +48,15 @@ public class KYCService {
         return data.orElse(null);
     };
 
-    public KYCData verifyKYC(String clientId, String secret, String inst) {
-        KYCData data = getKYCData();
+    public KYCData getKYCByRequestId(String id) {
+        Optional<KYCData> data = kycRepo.findByRequestId(id);
+        return data.orElse(null);
+    };
+
+    public KYCData verifyKYC(String clientId, String secret, String inst, String reqId) {
+        KYCData data = getKYCByRequestId(reqId);
+        if (data == null) return null;
+
         try {
             RestTemplate restTemplate = new RestTemplate();
             String url = "https://dg-sandbox.setu.co/api/digilocker/" + data.getRequestId() + "/aadhaar";
@@ -83,11 +90,15 @@ public class KYCService {
     };
 
     private String getAddress(JsonNode addressNode) {
-        return addressNode.path("house").toString() + ", " + addressNode.path("street").toString() + ", "
-                + addressNode.path("vtc").toString() + ", " + addressNode.path("locality").toString() +
-                ", " + addressNode.path("subDistrict").toString() + " " + addressNode.path("district").toString() + ", " +
-                addressNode.path("state").toString() + " - " + addressNode.path("pin").toString() + ", "
-                + addressNode.path("country").toString();
+        return addressNode.path("house").toString().replaceAll("^\"|\"$", "") + ", "
+                + addressNode.path("street").toString().replaceAll("^\"|\"$", "") + ", "
+                + addressNode.path("vtc").toString().replaceAll("^\"|\"$", "") + ", "
+                + addressNode.path("locality").toString().replaceAll("^\"|\"$", "") + ", "
+                + addressNode.path("subDistrict").toString().replaceAll("^\"|\"$", "") + " "
+                + addressNode.path("district").toString().replaceAll("^\"|\"$", "") + ", "
+                + addressNode.path("state").toString().replaceAll("^\"|\"$", "") + " - "
+                + addressNode.path("pin").toString().replaceAll("^\"|\"$", "") + ", "
+                + addressNode.path("country").toString().replaceAll("^\"|\"$", "");
     };
 
     public String getAadhaarPDF(String clientId, String secret, String inst, String reqid) {
@@ -118,7 +129,7 @@ public class KYCService {
             if (res.getStatusCode().is2xxSuccessful() && res.getBody() != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode json = mapper.readTree((String) res.getBody());
-                responseUrl = json.path("fileUrl").toString();
+                responseUrl = json.path("fileUrl").toString().replaceAll("^\"|\"$", "");
             }
         } catch (Exception ex) {
             log.info("Error occurred fetching AADHAAR PDF: {}, cause: {}, trace: {}",
@@ -126,6 +137,7 @@ public class KYCService {
             );
         }
 
+        log.info("ADDHAAR info download URL: {}", responseUrl);
         return responseUrl;
     };
 
@@ -143,7 +155,7 @@ public class KYCService {
         JsonNode addressNode = parent.path("address");
 
         String dob = parent.path("dateOfBirth").toString();
-        String photo = parent.path("photo").toString();
+        String photo = parent.path("photo").toString().replaceAll("^\"|\"$", "");
         String name = parent.path("name").toString();
         String maskedNumber = parent.path("maskedNumber").toString();
         String gender = parent.path("gender").toString();
@@ -152,12 +164,16 @@ public class KYCService {
         String postOffice = addressNode.path("postOffice").toString();
         String validUntil = parent.path("xml").path("validUntil").toString();
 
+        log.info("Data is, dob: {}, photo: {}, name: {}, aadhaar: {}, gender: {}, phone: {}, address: {}, postOffice: {}, validUntil: {}",
+                dob, photo, name, maskedNumber, gender, phone, address, postOffice, validUntil);
+
         data.setName(name);
+        data.setDob(dob);
         try {
-            data.setDob(new SimpleDateFormat("dd-MM-yyyy").parse(dob)); // throws exception
+            validUntil = validUntil.replaceAll("^\"|\"$", "");
             data.setValidUntil(Date.from(OffsetDateTime.parse(validUntil).toInstant()));
-        } catch (ParseException e) {
-            log.info("Could not parse Date: {}", dob);
+        } catch (Exception e) {
+            log.info("Could not parse Date: {}", validUntil);
         }
         data.setGender(gender);
         data.setPhone(phone);
