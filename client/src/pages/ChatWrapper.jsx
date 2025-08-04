@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const ChatWrapper = () => {
   const { token } = useAuthContext();
   const navigate = useNavigate();
-  const [verified, setVerified] = useState(true);
+  const [verified, setVerified] = useState(false);
 
   const verify = async () => {
     if (!token) {
@@ -25,6 +25,7 @@ const ChatWrapper = () => {
       });
 
       if (!res.ok) {
+        setVerified(false);
         navigate("/");
       } else {
         setVerified(true);
