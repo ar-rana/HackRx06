@@ -93,7 +93,7 @@ public class KYCService {
         return addressNode.path("house").toString().replaceAll("^\"|\"$", "") + ", "
                 + addressNode.path("street").toString().replaceAll("^\"|\"$", "") + ", "
                 + addressNode.path("vtc").toString().replaceAll("^\"|\"$", "") + ", "
-                + addressNode.path("locality").toString().replaceAll("^\"|\"$", "") + ", "
+                + addressNode.path("locality").toString().replaceAll("^\"|\"$", "") + " "
                 + addressNode.path("subDistrict").toString().replaceAll("^\"|\"$", "") + " "
                 + addressNode.path("district").toString().replaceAll("^\"|\"$", "") + ", "
                 + addressNode.path("state").toString().replaceAll("^\"|\"$", "") + " - "
@@ -137,7 +137,7 @@ public class KYCService {
             );
         }
 
-        log.info("ADDHAAR info download URL: {}", responseUrl);
+        log.info("AADHAAR info download URL: {}", responseUrl);
         return responseUrl;
     };
 
@@ -165,7 +165,7 @@ public class KYCService {
         String validUntil = parent.path("xml").path("validUntil").toString();
 
         log.info("Data is, dob: {}, photo: {}, name: {}, aadhaar: {}, gender: {}, phone: {}, address: {}, postOffice: {}, validUntil: {}",
-                dob, photo, name, maskedNumber, gender, phone, address, postOffice, validUntil);
+                dob, !photo.isEmpty(), name, maskedNumber, gender, phone, address, postOffice, validUntil);
 
         data.setName(name);
         data.setDob(dob);

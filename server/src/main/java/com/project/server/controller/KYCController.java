@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,7 +77,7 @@ public class KYCController {
                 DigilockerReq responseBody = ((DigilockerReq) res.getBody());
                 log.info("Response for KYC: {}", responseBody.toString());
                 kycService.saveVerification(responseBody.getId(), responseBody.getValidUpto());
-                System.out.println("Response: " + res.getBody());
+
                 return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT).body(responseBody.getUrl());
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -92,11 +93,13 @@ public class KYCController {
                          @RequestParam(required = true) String id, HttpServletResponse response) throws IOException {
         log.info("KYC status: {} for id: {}", success, id);
         if (!success) {
+            log.info("KYC auth FAILED for id: {}", id);
             response.sendRedirect(redirectUrl + "error");
             return;
         }
         KYCData data = kycService.verifyKYC(clientId, secret, inst, id);
         if (data == null || data.getValidUntil().before(new Date())) {
+            log.error("KYC Callback Data: {}, Expired: {}", data != null, data.getValidUntil());
             response.sendRedirect(redirectUrl + "error");
             return;
         }
@@ -107,7 +110,11 @@ public class KYCController {
     @GetMapping("/kyc")
     public ResponseEntity<KYCData> getKYCData() {
         KYCData data = kycService.getKYCData();
-        if (data == null || data.getValidUntil().before(new Date())) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (data == null || data.getValidUntil() == null || data.getValidUntil().before(new Date())) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            log.info("KYC unavailable/expired for user: {}; expired: {}", username, data != null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         User user = userService.getUser();
         if (!user.isVerified()) {
             user.setVerified(true);
