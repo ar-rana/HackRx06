@@ -87,9 +87,8 @@ const Profile = () => {
       <div className="relative h-3 w-3 text-2xl left-[107%] top-7 flex justify-center items-center">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="bg-white rounded-md px-1.5"
+          className="bg-white rounded-md p-1 fa fa-bars"
         >
-          <b>H</b>
         </button>
       </div>
       <div className="mx-4 mb-3 bg-gray-700 p-5 h-full overflow-y-scroll rounded-md">

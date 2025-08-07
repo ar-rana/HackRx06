@@ -1,5 +1,4 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
-import Chat from './pages/Chat.jsx';
 import Login from './pages/Login.jsx';
 import ChatWrapper from './pages/ChatWrapper.jsx';
 import Error from "./pages/Error.jsx";
